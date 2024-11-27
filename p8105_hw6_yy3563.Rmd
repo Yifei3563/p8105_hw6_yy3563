@@ -27,3 +27,54 @@ weather_df =
   select(name, id, everything())
 ```
 
+```{r}
+set.seed(123)
+boot_sample = function(df) {
+  
+  boot_df = 
+    sample_frac(df, replace = TRUE) 
+  
+  return(boot_df)
+  
+  }
+boot_straps =
+  tibble(
+    strap_number = 1:5000
+  ) |> 
+  mutate(
+    strap_sample = map(strap_number, \(i) boot_sample(df = weather_df)),
+    models = map(strap_sample, \(strap_df) lm(tmax ~ tmin, data = strap_df)),
+    results = map(models, broom::tidy),
+    results2 = map(models, broom::glance)
+  )
+
+boot_results =
+  boot_straps |> 
+  select(strap_number, results, results2) |> 
+  unnest(results2) |> 
+  select(strap_number, r.squared, results) |> 
+  unnest(results) |> 
+  group_by(strap_number, r.squared) |> 
+  summarize(logbeta=log(prod(estimate)), .groups="drop")
+```
+
+
+```{r}
+boot_results |> 
+  ggplot(aes(x = r.squared)) + 
+  geom_histogram()
+```
+
+
+```{r}
+boot_results |> 
+  ggplot(aes(x = logbeta)) +
+  geom_histogram()
+```
+
+Both distributions are approximate normal. These distributions indicate a reliable linear relationship between `tmin` and `tmax`, both in terms of explained variance and the model coefficients.
+
+
+
+
+
