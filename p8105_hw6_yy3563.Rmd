@@ -74,7 +74,29 @@ boot_results |>
 
 Both distributions are approximate normal. These distributions indicate a reliable linear relationship between `tmin` and `tmax`, both in terms of explained variance and the model coefficients.
 
+```{r}
+boot_results |> 
+  summarize(
+    boot_est = mean(r.squared),
+    boot_se = sd(r.squared),
+    boot_ci_ll = quantile(r.squared, 0.025),
+    boot_ci_ul = quantile(r.squared, 0.975)
+  )
+```
 
+The 95% confidence interval for the $r^2$ is (0.895,	0.927).
+
+```{r}
+boot_results |> 
+  summarize(
+    boot_est = mean(logbeta),
+    boot_se = sd(logbeta),
+    boot_ci_ll = quantile(logbeta, 0.025),
+    boot_ci_ul = quantile(logbeta, 0.975)
+  )
+```
+
+The 95% confidence interval for the $log(\hat{\beta_0}\cdot\hat{\beta}_1)$ is (1.96,	2.06).
 
 
 
