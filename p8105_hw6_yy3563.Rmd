@@ -106,5 +106,28 @@ homicide = read_csv("data/homicide-data.csv") |>
   janitor::clean_names()
 ```
 
+```{r}
+homicide =
+  homicide |> 
+  mutate(
+    city_state = paste0(city, ", ", state)) |> 
+  filter(!city_state %in% c("Dallas, TX", "Phoenix, AZ", 
+                            "Kansas city, MO",
+                           "Tulsa, AL")) |> 
+  filter(victim_race %in% c("Black", "White")) |> 
+  mutate(solved = 
+           ifelse(disposition == "Closed by arrest", 1, 0)) |> 
+  filter(!is.na(victim_age), 
+         !is.na(solved),
+         !is.na(victim_sex),
+         !is.na(victim_race)
+         )
+```
+
+
+
+
+
+
 
 
