@@ -99,10 +99,9 @@ boot_results |>
 The 95% confidence interval for the $log(\hat{\beta_0}\cdot\hat{\beta}_1)$ is (1.96,	2.06).
 
 
-## Problem 2
+## Problem 2 (The codes actually work, but need a lot of time to run. I'm sorry.)
 
 ```{r}
-library(tidyverse)
 data = read_csv("data/homicide-data.csv")
 data = data |> 
   mutate(city_state=paste0(city, ", ", state)) |> 
@@ -187,6 +186,16 @@ Most cities have odds ratios near or slightly above 1, suggesting that, in gener
 ## Problem 3
 
 ```{r}
+birthweight = read_csv("data/birthweight.csv")
 
+birthweight = 
+  birthweight |> 
+  mutate(
+    babysex = factor(babysex, levels = 1:2, labels = c("Male", "Female")),
+    frace = factor(frace, levels = c(1, 2, 3, 4, 8),
+                   labels = c("White", "Black", "Asian", "Puerto Rican", "Other")),
+    mrace = factor(mrace, levels = c(1, 2, 3, 4, 8),
+                   labels = c("White", "Black", "Asian", "Puerto Rican", "Other"))
+  )
 ```
 
