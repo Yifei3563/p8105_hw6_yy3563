@@ -103,14 +103,15 @@ The 95% confidence interval for the $log(\hat{\beta_0}\cdot\hat{\beta}_1)$ is (1
 
 ```{r}
 library(tidyverse)
-data <- read_csv("data/homicide-data.csv")
-data <- data %>% mutate(city_state=paste0(city, ", ", state)) %>%
+data = read_csv("data/homicide-data.csv")
+data = data |> 
+  mutate(city_state=paste0(city, ", ", state)) |> 
   filter(!city_state %in% c("Dallas, TX", "Phoenix, AZ", 
                             "Kansas city, MO",
-                           "Tulsa, AL")) %>%
-  filter(victim_race %in% c("Black", 'White')) %>%
+                           "Tulsa, AL")) |> 
+  filter(victim_race %in% c("Black", "White")) |> 
 
-   mutate(solved = ifelse(disposition == "Closed by arrest", 1, 0)) %>%
+   mutate(solved = ifelse(disposition == "Closed by arrest", 1, 0)) |> 
   filter(!is.na(victim_age), 
          !is.na(solved),
          !is.na(victim_sex),
@@ -120,31 +121,33 @@ data <- data %>% mutate(city_state=paste0(city, ", ", state)) %>%
 
 ```{r}
 library(broom)
-model1 <- glm(solved~victim_age+victim_sex+victim_race, 
-              subset(data, city_state=="Baltimore, MD"),
+model1 = glm(solved ~ victim_age + victim_sex + victim_race, 
+              subset(data, city_state == "Baltimore, MD"),
               family="binomial")
-tidy_model <- tidy(model1, conf.int = TRUE)
-tidy_model %>% filter(term == "victim_sexMale") %>%
+tidy_model = tidy(model1, conf.int = TRUE)
+tidy_model |> 
+  filter(term == "victim_sexMale") |> 
   mutate(oddsratio = exp(estimate),
-         lower=exp(conf.low),
-         upper = exp(conf.high)) %>%
+         lower = exp(conf.low),
+         upper = exp(conf.high)) |> 
   select(estimate, oddsratio, lower, upper)
 ```
 
 The adjusted odds ratio for solving homicides comparing male victims to female victims keeping all other variables fixed is 0.456, the 95% Confidence Interval for the Adjusted Odds Ratio is (0.339, 0.612).
 
 ```{r}
-extract_odds_ratio <- function(city_data) {
-  model <- glm(solved ~ victim_age + victim_sex + victim_race,
+extract_odds_ratio = function(city_data) {
+  model = glm(solved ~ victim_age + victim_sex + victim_race,
                data = city_data,
                family = "binomial")
 
-  tidy_model <- tidy(model, conf.int=T)
-  sex_coef <- tidy_model %>% filter(term == "victim_sexMale")
+  tidy_model = tidy(model, conf.int=T)
+  sex_coef = tidy_model |> 
+    filter(term == "victim_sexMale")
   
-  odds_ratio <- exp(sex_coef$estimate)
-  ci_lower <- exp(sex_coef$conf.low)
-  ci_upper <- exp(sex_coef$conf.high)
+  odds_ratio = exp(sex_coef$estimate)
+  ci_lower = exp(sex_coef$conf.low)
+  ci_upper = exp(sex_coef$conf.high)
 
   tibble(
     city = unique(city_data$city_state),
@@ -154,11 +157,11 @@ extract_odds_ratio <- function(city_data) {
   )
 }
 
-results <- data %>%
-  group_by(city_state) %>%
-  nest() %>%
-  mutate(odds_ratio_data = map(data, extract_odds_ratio)) %>%
-  select(city_state, odds_ratio_data) %>%
+results = data |> 
+  group_by(city_state) |> 
+  nest() |> 
+  mutate(odds_ratio_data = map(data, extract_odds_ratio)) |> 
+  select(city_state, odds_ratio_data) |> 
   unnest(odds_ratio_data)
 head(results)
 ```
@@ -181,4 +184,9 @@ results |>
 Most cities have odds ratios near or slightly above 1, suggesting that, in general, male victims are somewhat more likely to have their cases solved compared to female victims.
 
 
+## Problem 3
+
+```{r}
+
+```
 
