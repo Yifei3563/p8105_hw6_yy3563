@@ -199,3 +199,35 @@ birthweight =
   )
 ```
 
+```{r}
+model.full = lm(bwt ~ ., data = birthweight)
+model1 = step(model.full)
+summary(model1)
+```
+
+```{r}
+data_with_predictions =
+  birthweight |> 
+  add_predictions(model1, var = "fitted_values") |> 
+  add_residuals(model1, var = "residuals")
+
+data_with_predictions |> 
+  ggplot(aes(x = fitted_values, y = residuals)) +
+  geom_point(alpha = 0.5) +
+  geom_hline(yintercept = 0, color = "red", linetype = "dashed") +
+  labs(
+    title = "Residuals vs Fitted Values",
+    x = "Fitted Values (Predicted Birthweight)",
+    y = "Residuals"
+  ) +
+  theme_minimal()
+```
+
+The majority of residuals are centered around zero, as indicated by the horizontal red dashed line, suggesting that the model captures the data reasonably well. However, there are some outliers, with a few residuals significantly deviating from zero. 
+
+
+
+
+
+
+
