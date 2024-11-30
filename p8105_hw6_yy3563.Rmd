@@ -9,6 +9,8 @@ output: github_document
 library(tidyverse)
 library(broom)
 library(modelr)
+library(mgcv)
+library(SemiPar)
 ```
 
 ## Problem 1
@@ -225,9 +227,51 @@ data_with_predictions |>
 
 The majority of residuals are centered around zero, as indicated by the horizontal red dashed line, suggesting that the model captures the data reasonably well. However, there are some outliers, with a few residuals significantly deviating from zero. 
 
+```{r}
+model2 = lm(bwt ~ blength + gaweeks, data = birthweight)
+summary(model2)
+```
+
+```{r}
+model3 = lm(bwt ~ bhead * blength * babysex, data = birthweight)
+summary(model3)
+```
 
 
+```{r}
+cv_df = 
+  crossv_mc(birthweight, 100) |> 
+  mutate(
+    train = map(train, as_tibble),
+    test = map(test, as_tibble)
+  )
+```
 
+```{r}
+cv_res_df = 
+  cv_df |> 
+  mutate(
+    m1 =  map(train, \(x) lm(formula(model1), data = x)),
+    m2 =  map(train, \(x) lm(formula(model2), data = x)),
+    m3 =  map(train, \(x) lm(formula(model3), data = x))
+  ) |> 
+  mutate(
+    rmse_model1 = map2_dbl(m1, test, rmse),
+    rmse_model2 = map2_dbl(m2, test, rmse),
+    rmse_model3 = map2_dbl(m3, test, rmse)
+  )
+```
 
-
+```{r}
+cv_res_df |> 
+  select(starts_with("rmse")) |> 
+  pivot_longer(
+    everything(),
+    names_to = "model",
+    values_to = "rmse",
+    names_prefix = "rmse_"
+  ) |> 
+  ggplot(aes(x = model, y = rmse)) +
+  geom_violin()
+```
 
